@@ -78,18 +78,18 @@ static const Checkpoints::CCheckpointData data = {
 
 static Checkpoints::MapCheckpoints mapCheckpointsTestnet =
         boost::assign::map_list_of
-        ( 546, uint256("000000002a936ca763904c3c35fce2f3556c559c0214345d31b1bcebf76acb70"))
+        ( 0, uint256("004d7679608d095f4987e0884d04cf97dcacbd5d44d282950c6529e27dad76ec"))
         ;
 static const Checkpoints::CCheckpointData dataTestnet = {
         &mapCheckpointsTestnet,
-        1337966069,
-        1488,
-        300
+        1780802045,
+        0,
+        0
     };
 
 static Checkpoints::MapCheckpoints mapCheckpointsRegtest =
         boost::assign::map_list_of
-        ( 0, uint256("0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206"))
+        ( 0, uint256("733c5e1c38f835803ffe34428ee244722709971659ba2c2e5ff6480aa04119cc"))
         ;
 static const Checkpoints::CCheckpointData dataRegtest = {
         &mapCheckpointsRegtest,
@@ -203,19 +203,30 @@ public:
         nMinerThreads = 0;
         nTargetTimespan = 14 * 24 * 60 * 60; //! two weeks
         nTargetSpacing = 10 * 60;
+        bnProofOfWorkLimit = ~uint256(0) >> 1;
 
-        //! Modify the testnet genesis block so the timestamp is valid for a later start.
-        genesis.nTime = 1296688602;
-        genesis.nNonce = 414098458;
+        //! BitcoinPay custom testnet genesis block
+        const char* pszTimestampTestnet = "BitcoinPay Testnet Genesis 2026";
+        CMutableTransaction txNewTestnet;
+        txNewTestnet.vin.resize(1);
+        txNewTestnet.vout.resize(1);
+        txNewTestnet.vin[0].scriptSig = CScript() << 486604799 << CScriptNum(4) << vector<unsigned char>((const unsigned char*)pszTimestampTestnet, (const unsigned char*)pszTimestampTestnet + strlen(pszTimestampTestnet));
+        txNewTestnet.vout[0].nValue = 50 * COIN;
+        txNewTestnet.vout[0].scriptPubKey = CScript() << ParseHex("04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f") << OP_CHECKSIG;
+        genesis.vtx.clear();
+        genesis.vtx.push_back(txNewTestnet);
+        genesis.hashPrevBlock = 0;
+        genesis.hashMerkleRoot = genesis.BuildMerkleTree();
+        genesis.nVersion = 1;
+        genesis.nTime    = 1780802045;
+        genesis.nBits    = 0x2000ffff;
+        genesis.nNonce   = 30;
         hashGenesisBlock = genesis.GetHash();
-        assert(hashGenesisBlock == uint256("0x000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943"));
+        assert(hashGenesisBlock == uint256("0x004d7679608d095f4987e0884d04cf97dcacbd5d44d282950c6529e27dad76ec"));
+        assert(genesis.hashMerkleRoot == uint256("0x52adad53e392ab7a96a840d9b50e7f4c290669be216d2c2714fa80617f3ce3bf"));
 
         vFixedSeeds.clear();
         vSeeds.clear();
-        vSeeds.push_back(CDNSSeedData("alexykot.me", "testnet-seed.alexykot.me"));
-        vSeeds.push_back(CDNSSeedData("bitcoin.petertodd.org", "testnet-seed.bitcoin.petertodd.org"));
-        vSeeds.push_back(CDNSSeedData("bluematt.me", "testnet-seed.bluematt.me"));
-        vSeeds.push_back(CDNSSeedData("bitcoin.schildbach.de", "testnet-seed.bitcoin.schildbach.de"));
 
         base58Prefixes[PUBKEY_ADDRESS] = list_of(111);
         base58Prefixes[SCRIPT_ADDRESS] = list_of(196);
@@ -226,7 +237,7 @@ public:
         convertSeed6(vFixedSeeds, pnSeed6_test, ARRAYLEN(pnSeed6_test));
 
         fRequireRPCPassword = true;
-        fMiningRequiresPeers = true;
+        fMiningRequiresPeers = false;
         fAllowMinDifficultyBlocks = true;
         fDefaultConsistencyChecks = false;
         fRequireStandard = false;
@@ -260,12 +271,12 @@ public:
         nTargetTimespan = 14 * 24 * 60 * 60; //! two weeks
         nTargetSpacing = 10 * 60;
         bnProofOfWorkLimit = ~uint256(0) >> 1;
-        genesis.nTime = 1296688602;
+        genesis.nTime = 1780802045;
         genesis.nBits = 0x207fffff;
         genesis.nNonce = 2;
         hashGenesisBlock = genesis.GetHash();
         nDefaultPort = 18444;
-        assert(hashGenesisBlock == uint256("0x0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206"));
+        assert(hashGenesisBlock == uint256("0x733c5e1c38f835803ffe34428ee244722709971659ba2c2e5ff6480aa04119cc"));
 
         vFixedSeeds.clear(); //! Regtest mode doesn't have any fixed seeds.
         vSeeds.clear();  //! Regtest mode doesn't have any DNS seeds.
